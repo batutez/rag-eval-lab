@@ -1,0 +1,41 @@
+# --- OS files ---
+.DS_Store
+Thumbs.db
+
+# --- Editor / IDE ---
+.vscode/
+.idea/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+
+# --- Environments ---
+.venv/
+venv/
+env/
+.env
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+
+# --- Logs and outputs ---
+*.log
+logs/
+outputs/
+results/
+wandb/
+runs/
+
+# --- Model checkpoints / weights ---
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.bin
+
