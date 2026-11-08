@@ -1,4 +1,4 @@
-# eval_set_experiments
+# rag-eval-lab
 
 Experiments on building a synthetic evaluation dataset for a Turkish-language
 RAG (retrieval-augmented generation) assistant, and on chunking strategies for
