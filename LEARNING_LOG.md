@@ -66,3 +66,27 @@
   - Verify the BERTurk and LaBSE limits (512 inferred from warnings) and BERTurk's `strip_accents` setting.
   - Decide on text normalisation (â, ligatures like ﬂ).
   - M1: structure-aware chunking of Doc01 with a per-chunk token check.
+
+
+## 2026-11-10 — Chunking Doc01 (M1)
+
+- **Goal:** Turn Doc01 into retrievable chunks with metadata, ready for embedding in M2.
+- **Tried:** `sandbox/m1_1_chunking.py` reads the md file block by block (blank-line separated), tracks the current page and headings, and stores each paragraph with its metadata. `sandbox/m1_2_option_c_experiment.ipynb` tested sentence packing, the fallback cut and overlap.
+- **Result:**
+  - 305 paragraphs found; 256 kept after the short-paragraph rule; 270 chunks (10 paragraphs over 1,000 characters were split).
+  - Chunk text: 42 to 985 characters (median 261). Longest paragraph (3,915 characters) became 6 chunks.
+  - Heading path + chunk: at most 1,187 characters, roughly 270 e5 tokens (estimate); exact token check runs with the e5 tokenizer in the script.
+  - Output: `outputs/doc01_yapay_zeka_eylem_plani_chunks_max1000_ov1.jsonl` (git-ignored) and W&B group `m1-chunking`.
+- **Decisions:**
+  - Paragraphs under 40 characters are dropped (sidebar numbers, labels, diagram labels). Known losses: the end of one Eylem 8 sentence ("Programı ile destekleyecektir.") and "TÜBİTAK" at the end of Eylem 16's responsible list.
+  - Long paragraphs: sentence packing up to 1,000 characters, one-sentence overlap, fallback cut at a space for sentences over 1,000 (not triggered in Doc01).
+  - Each chunk carries: chunk_id, doc_id, page_pdf, page_printed, heading_path, eylem, part / n_parts, char_start / char_end of its paragraph.
+  - Embedding text = heading path + blank line + chunk text, so the embedding sees which section and Eylem a chunk belongs to.
+  - Pieces of one paragraph share the paragraph's character span (evaluation at paragraph level for split paragraphs).
+- **Learned:**
+  - Filtering by length must happen only for paragraphs, not before page markers and headings are read; otherwise all page numbers and section context are lost.
+  - A fixed character window cuts inside words and sentences; packing whole sentences avoids that.
+  - Overlap only affects the 10 split paragraphs here: 270 chunks with overlap vs 269 without. Its benefit is unknown until M2.
+- **Next:**
+  - M2: embed the chunks with e5 and test retrieval on the in-scope Doc01 questions of eval-set-v1.
+  - Known issues to revisit: flat heading levels (EKSEN replaces "05 Eylemler" in the path), page-break fragments, ligatures (ﬂ).
